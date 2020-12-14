@@ -27,12 +27,22 @@ class ViewController: UIViewController {
     let cameraController = CameraController()
     
     override var prefersStatusBarHidden: Bool { return true }
+
+    let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
     
 }
 
 extension ViewController {
+
+    func presentPermissionsViewController() {
+
+        let newViewcontroller = PermissionsViewController()
+        newViewcontroller.modalPresentationStyle = .currentContext
+
+        present(newViewcontroller, animated: true, completion: nil)
+    }
+
     override func viewDidLoad() {
-        
         func configureCameraController() {
             cameraController.prepare {(error) in
                 if let error = error {
@@ -62,7 +72,7 @@ extension ViewController {
             cameraController.flashMode = .off
             toggleFlashButton.setImage(#imageLiteral(resourceName: "Flash Off Icon"), for: .normal)
         }
-            
+
         else {
             cameraController.flashMode = .on
             toggleFlashButton.setImage(#imageLiteral(resourceName: "Flash On Icon"), for: .normal)
@@ -73,24 +83,27 @@ extension ViewController {
         do {
             try cameraController.switchCameras()
         }
-            
+
         catch {
             print(error)
         }
         
         switch cameraController.currentCameraPosition {
-        case .some(.front):
-            toggleCameraButton.setImage(#imageLiteral(resourceName: "Front Camera Icon"), for: .normal)
-            
-        case .some(.rear):
-            toggleCameraButton.setImage(#imageLiteral(resourceName: "Rear Camera Icon"), for: .normal)
-            
-        case .none:
-            return
+            case .some(.front):
+                toggleCameraButton.setImage(#imageLiteral(resourceName: "Front Camera Icon"), for: .normal)
+
+            case .some(.rear):
+                toggleCameraButton.setImage(#imageLiteral(resourceName: "Rear Camera Icon"), for: .normal)
+
+            case .none:
+                return
         }
     }
     
     @IBAction func captureImage(_ sender: UIButton) {
+
+        presentPermissionsViewController()
+
         cameraController.captureImage {(image, error) in
             guard let image = image else {
                 print(error ?? "Image capture error")
